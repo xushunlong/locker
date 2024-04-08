@@ -22,7 +22,7 @@ public class LockerResolver {
     @Autowired
     private LockerExecutor lockerExecutor;
 
-    @Around("@annotation(com.example.shedlock.selfLock.locker.Locker)")
+    @Around("@annotation(com.example.shedlock.selfLock.aop.Locker)")
     public Object doAround(ProceedingJoinPoint proceedingJoinPoint) throws InterruptedException {
         LockerConfiguration lockerConfiguration = lockerConfigurationExtractor.getLockerConfiguration(proceedingJoinPoint);
 

@@ -1,6 +1,6 @@
 package com.example.shedlock.test;
 
-import com.example.shedlock.selfLock.locker.Locker;
+import com.example.shedlock.selfLock.aop.Locker;
 import org.springframework.stereotype.Service;
 
 @Service

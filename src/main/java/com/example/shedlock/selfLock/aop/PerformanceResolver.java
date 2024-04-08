@@ -1,22 +1,36 @@
 package com.example.shedlock.selfLock.aop;
 
 import com.example.shedlock.selfLock.locker.LockerConfiguration;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
-import java.sql.Timestamp;
 
+@Aspect
 @Component
-public class LockerConfigurationExtractor {
-    public LockerConfiguration getLockerConfiguration(ProceedingJoinPoint proceedingJoinPoint) {
+@Slf4j
+@Order(1)
+public class PerformanceResolver {
+    @Around("@annotation(com.example.shedlock.selfLock.aop.Performance)")
+    public Object doAround(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
         Method method = processLockedMethod(proceedingJoinPoint);
+        Performance performance = AnnotatedElementUtils.getMergedAnnotation(method, Performance.class);
+        String info = performance.info();
 
-        return processLockerConfiguration(method);
+        long start = System.currentTimeMillis();
+        Object proceed = proceedingJoinPoint.proceed();
+        long end = System.currentTimeMillis();
+        log.info("process method time: {}", end - start);
+
+        return proceed;
     }
 
     private Method processLockedMethod(ProceedingJoinPoint proceedingJoinPoint) {
@@ -35,19 +49,4 @@ public class LockerConfigurationExtractor {
         }
     }
 
-    private LockerConfiguration processLockerConfiguration(Method method) {
-        Locker targetAnnotation = AnnotatedElementUtils.getMergedAnnotation(method, Locker.class);
-        LockerConfiguration lockerConfiguration = new LockerConfiguration();
-        lockerConfiguration.setName(targetAnnotation.name());
-        lockerConfiguration.setLockUntil(processTime(targetAnnotation.lockMillSeconds()));
-        lockerConfiguration.setRetry(targetAnnotation.retry());
-        lockerConfiguration.setRetryTimes(targetAnnotation.retryTimes());
-
-        return lockerConfiguration;
-    }
-
-    private Timestamp processTime(int timeOffset) {
-        long l = System.currentTimeMillis();
-        return new Timestamp(l + timeOffset);
-    }
 }

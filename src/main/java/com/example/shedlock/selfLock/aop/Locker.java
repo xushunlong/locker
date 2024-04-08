@@ -1,4 +1,4 @@
-package com.example.shedlock.selfLock.locker;
+package com.example.shedlock.selfLock.aop;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
